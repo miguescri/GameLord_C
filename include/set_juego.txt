@@ -1,0 +1,52 @@
+
+espec set_juegos
+    usa naturales, piezas, tableros
+    
+géneros set_juego
+    {El TAD representa un juego de mesa con un tablero bidimensional y un conjunto de piezas que pueden estar tanto dentro como fuera del tablero. El TAD ofrece operaciones para ver y modificar los atributos de las piezas, colocarlas sobre el tablero, moverlas y quitarlas, así como ver y modificar los tipos de las casillas del tablero.}
+
+operaciones
+    parcial crear: natural ncol, natural nfil, vector[1..ncol*nfil] de natural tip, natural npie , vector[1..npie] de pieza conjpie -> set_juego 
+        {Devuelve un set_juego con un conjunto de piezas conjpie y un tablero de ncol columnas y nfil filas en el que cada casilla en la columna x y fila y es del tipo indicado en la componente i de tip, siendo i = (y-1)*ncol + x. Todas las piezas con estado distinto a OFF_BOARD están colocadas sobre el tablero en la posición correspondiente a sus coordenadas.
+        Parcial: la operación no está definida si en las piezas de conjpie se repite algún id, o si alguna de esas piezas tiene unas coordenadas que se salen de los límites del tablero, o si dos o más piezas que han de estar sobre el tablero tienen las mismas coordenadas.}
+    
+    parcial leerTipo: set_juego set, natural fil, natural col -> natural
+        {Devuelve el tipo de la casilla situada en la fila fil y columna col del tablero de set
+        Parcial: la operación no está definida si la posición de la fila fil y columna col está fuera de los límites del tablero.}
+    
+    parcial escribirTipo: set_juego set, natural fil, natural col, natural tip -> set_juego
+        {Devuelve un set_juego igual a set pero en cuyo tablero la casilla en la fila fil y columna col es de tipo tip.
+        Parcial: la operación no está definida si la posición de la fila fil y columna col está fuera de los límites del tablero.}
+    
+    parcial colocarPieza: set_juego set, natural id -> set_juego
+        {Sea (colp,filp) la posición (x,y) de la pieza pie con identificador id almacenada en set. Devuelve un set_juego igual a set pero en el que pie está en la casilla de la fila filp y columna colp del tablero. El estado de pie pasa a ser ON_BOARD.
+        Parcial: la operación no está definida si en set no hay ninguna pieza con identificador id, o si la posición de la fila filp y columna colp está fuera de los límites del tablero, o si en la casilla ya había una pieza, o si el estado de pie no era OFF_BOARD.}
+    
+    parcial quitarPiezaXY: set_juego set, natural fil, natural col -> set_juego
+        {Sea pie la pieza de set situada en la casilla del tablero de la columna col y fila fil. Devuelve un set_juego igual a set pero en el que dicha casilla está libre y pie tiene estado OFF_BOARD.
+        Parcial: la operación no está definida si la posición de la fila fil y columna col está fuera de los límites del tablero, o si no había ninguna pieza en la casilla.}
+    
+    parcial quitarPiezaID: set_juego set, natural id -> set_juego
+        {Sean (col,fil) las coordenadas (x,y) de la pieza pie de set con identificador id. Devuelve un set_juego igual a set pero en el que la casilla del tablero situada en la fila fil y columna col está libre. pie tiene estado OFF_BOARD.
+        Parcial: la operación no está definida si en set no hay ninguna pieza con identificador id, o si pie no está sobre el tablero.}
+        
+    parcial verPiezaXY: set_juego set, natural fil, natural col -> pieza
+        {Devuelve una pieza igual a la que hay en la casilla de la fila fil y columna col del tablero de set.
+        Parcial: la operación no está definida si la posición de la fila fil y columna col está fuera de los límites de tab, o si no hay ninguna pieza en esa casilla.}
+    
+    parcial verPiezaID: set_juego set, natural id -> pieza
+        {Sea pie la pieza de set con identificador id. Devuelve una pieza igual a pie.
+        Parcial: la operación no está definida si no hay ninguna pieza con identificador id en set.}
+        
+    parcial moverPiezaXY: set_juego set, natural fil0, natural col0, natural fil1, natural col1 -> set_juego
+        {Sea pie la pieza de set que hay en la casilla del tablero en la fila fil0 y columna col0. Devuelve un set_juego igual a set pero en el que la casilla en la fila fil0 y columna col0 del tablero no contiene ninguna pieza y pie está situada en la casilla en la fila fil1 y columna col1. pie tiene coordenadas (x,y) correspondientes a (col1,fil1).
+        Parcial: la operación no está definida si la posición de la fila fil0 y columna col0 está fuera de los límites del tablero, o si en esa casilla no hay ninguna pieza, o si la posición de la fila fil1 y columna col1 está fuera de los límites del tablero, o si en esa posición ya había una pieza.}
+        
+    parcial moverPiezaID: set_juego set, natural id, natural fil1, natural col1 -> set_juego
+        {Sean (col0,fil0) las coordenadas (x,y) de la pieza pie de set con identificador id. Devuelve un set_juego igual a set pero en el que la casilla en la fila fil0 y columna col0 del tablero no contiene ninguna pieza y pie está situada en la casilla en la fila fil1 y columna col1. pie tiene coordenadas (x,y) correspondientes a (col1,fil1).
+        Parcial: la operación no está definida si no hay ninguna pieza con identificador id en set, o si pie no está sobre el tablero, o si la posición de la fila fil1 y columna col1 está fuera de los límites del tablero, o si en esa posición ya había una pieza.}
+    
+    parcial actualizarPiezaXY: set_juego set, natural fil0, natural col0, pieza pie2 -> set_juego
+    
+    parcial actualizarPiezaID: set_juego set, natural id, pieza pie2 -> set_juego
+fespec

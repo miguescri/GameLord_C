@@ -1,0 +1,40 @@
+
+espec tableros
+    usa naturales, piezas
+    
+géneros tablero
+    {El TAD representa un tablero bidimensional como el del ajedrez, sobre el que se ponen, quitan y mueven piezas. Cada casilla del tablero está caracterizada:
+        -Coordenadas x e y, correspondientes a columna y fila.
+        -Tipo de casilla. 
+        -Si la hay, pieza que contiene.
+     En cada casilla puede haber como máximo una pieza al mismo tiempo. El TAD ofrece operaciones para modificar el tipo de cada casilla, poner, quitar y mover piezas sobre el tablero.}
+
+operaciones
+    crear: natural ncol, natural nfil, vector[1..ncol*nfil] de natural tip -> tablero
+        {Devuelve un tablero con ncol columnas y nfil filas en el que cada casilla en la columna x y fila y es del tipo indicado en la componente i de tip, siendo i = (y-1)*ncol + x.}
+        
+    parcial leerTipo: tablero tab, natural fil, natural col -> natural
+        {Devuelve el tipo de la casilla situada en la fila fil y columna col de tab
+        Parcial: la operación no está definida si la posición de la fila fil y columna col está fuera de los límites de tab.}
+    
+    parcial escribirTipo: tablero tab, natural fil, natural col, natural tip -> tablero
+        {Devuelve un tablero igual a tab pero en el que la casilla en la fila fil y columna col es de tipo tip.
+        Parcial: la operación no está definida si la posición de la fila fil y columna col está fuera de los límites de tab.}
+    
+    parcial colocarPieza: tablero tab, pieza pie -> tablero
+        {Sea (colp,filp) la posición (x,y) de pie. Devuelve un tablero igual a tab pero en el que la casilla en la fila filp y columna colp contiene una pieza igual a pie pero cuyo estado es ON_BOARD, si anteriormente era OFF_BOARD.
+        Parcial: la operación no está definida si la posición de la fila filp y columna colp está fuera de los límites de tab, o si en la casilla ya había una pieza.}
+    
+    parcial quitarPieza: tablero tab, natural fil, natural col -> tablero
+        {Devuelve un tablero igual a tab pero en el que la casilla en la fila fil y columna col no contiene ninguna pieza.
+        Parcial: la operación no está definida si la posición de la fila fil y columna col está fuera de los límites de tab, o si no había ninguna pieza en la casilla.}
+    
+    parcial verPieza: tablero tab, natural fil, natural col -> pieza
+        {Devuelve una pieza igual a la que hay en la casilla de la fila fil y columna col de tab.
+        Parcial: la operación no está definida si la posición de la fila fil y columna col está fuera de los límites de tab, o si no hay ninguna pieza en esa casilla.}
+    
+    parcial moverPieza: tablero tab, natural fil0, natural col0, natural fil1, natural col1 -> tablero
+        {Sea pie la pieza que hay en la casilla de la fila fil0 y columna col0 de tab. Devuelve un tablero igual a tab pero en el que la casilla en la fila fil0 y columna col0 no contiene ninguna pieza y la casilla en la fila fil1 y columna col1 contiene una pieza igual a pie.
+        Parcial: la operación no está definida si la posición de la fila fil0 y columna col0 está fuera de los límites de tab, o si en esa casilla no hay ninguna pieza, o si la posición de la fila fil1 y columna col1 está fuera de los límites de tab, o si en esa posición ya había una pieza.}
+
+fespec

@@ -1,0 +1,69 @@
+
+espec piezas
+    usa naturales, cadenas
+
+género pieza
+    {El TAD representa una pieza de un juego de tablero como el ajedrez, donde cada pieza tiene los atributos:
+        -Posición en el tablero (coordenadas x e y).
+        -Equipo (blancas, negras...).
+        -Nombre ("Peón negro 4", "Caballo blanco 1"...).
+        -Estado (fuera de juego, en juego...).
+        -Tipo (peón, caballo...).
+        -Id (identificador único para diferenciar a piezas con todos los demás atributos iguales).
+        -Dirección hacia la que se está moviendo.
+    
+    El TAD cuenta con operaciones para conocer y modificar cada uno de los atributos de una pieza.}
+    
+operaciones
+    crear: natural x, natural y, natural id, cadena nom, natural equi, natural est, natural tip, natural dir-> pieza
+        {Devuelve una pieza cuyos atributos son x, y, equip, nom, est, tip, id y dir.}
+    
+    escribirX: pieza p, natural x -> pieza
+        {Devuelve una pieza igual a p pero con x como posición x.}
+    
+    leerX: pieza p -> natural
+        {Devuelve la posición x de p.}
+    
+    escribirY: pieza p, natural y -> pieza
+        {Devuelve una pieza igual a p pero con y como posición y.}
+    
+    leerY: pieza p -> natural
+        {Devuelve la posición y de p.}
+    
+    escribirID: pieza p, natural id -> pieza
+        {Devuelve una pieza igual a p pero con id como identificador.}
+    
+    leerID: pieza p -> natural
+        {Devuelve el identificador de p.}
+    
+    escribirNombre: pieza p, cadena nom -> pieza
+        {Devuelve una pieza igual a p pero con nom como nombre.}
+    
+    leerNombre: pieza p -> cadena
+        {Devuelve el nombre de p.}
+    
+    escribirEquipo: pieza p, natural equi -> pieza
+        {Devuelve una pieza igual a p pero con equi como equipo.}
+    
+    leerEquipo: pieza p -> natural
+        {Devuelve el equipo de p.}
+    
+    escribirEstado: pieza p, natural est -> pieza
+        {Devuelve una pieza igual a p pero con est como estado.}
+    
+    leerEstado: pieza p -> natural
+        {Devuelve el estado de p.}
+    
+    escribirTipo: pieza p, natural tip -> pieza
+        {Devuelve una pieza igual a p pero con tip como tipo.}
+    
+    leerTipo: pieza p -> natural
+        {Devuelve el tipo de p.}
+        
+    escribirDireccion: pieza p, natural dir -> pieza
+        {Devuelve una pieza igual a p pero con dir como dirección.}
+    
+    leerDirección: pieza p -> natural
+        {Devuelve la dirección de p.}
+        
+fespec

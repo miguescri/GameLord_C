@@ -1,0 +1,111 @@
+#######################
+# Makefile para sistemas cliente-servidor
+# Autor: Miguel Escribano Pérez
+# NIA Unizar: 698570
+#######################
+
+#######################
+# definicion de variables y constantes
+#######################
+RM := rm -rf
+CPP := g++
+CPPFLAGS := -std=c++11
+UNAME := $(shell uname)
+ifeq ($(UNAME), Linux) 
+	SOCKETFLAGS := -Wall -pthread
+endif
+ifeq ($(UNAME), SunOS) # hendrix
+	SOCKETFLAGS := -Wall -pthread -lsocket -lnsl -lrt
+endif
+
+# directorio fuentes
+src := src/
+# directorio binarios
+bin := bin/
+# directorio cabeceras
+head := include/
+
+# nombre fichero comprimido
+file := cliente_servidor
+
+# path documentación del código
+docu := html/index.html
+
+# nombres de ejecutables
+servidor := Servidor
+cliente := Cliente
+
+# fuente del servidor
+server := plantilla_server
+# fuente del cliente
+client := plantilla_client
+# especificaciones del intercambio de mensajes
+protocolo := Plantilla_protocolo_comunicacion
+# gestor de hilos en servidor multicliente
+multihandler := ContadorThreads
+# fuente de los sockets
+socket := Socket
+
+
+#######################
+# definicion de objetivos
+#######################
+
+.PHONY:all
+# objetivo por defecto: servidor y cliente
+all: ${servidor} ${cliente}
+
+# objetivo servidor
+${servidor}: ${bin}${server}.o ${bin}${multihandler}.o ${bin}${socket}.o
+	${CPP} ${bin}${server}.o ${bin}${multihandler}.o ${bin}${socket}.o -o ${servidor} ${SOCKETFLAGS}
+
+# objetivo cliente
+${cliente}: ${bin}${client}.o ${bin}${socket}.o
+	${CPP} ${bin}${client}.o ${bin}${socket}.o -o ${cliente} ${SOCKETFLAGS}
+
+# objetivo server.o
+${bin}${server}.o: ${src}${server}.cpp ${head}${protocolo}.h ${head}${multihandler}.h ${head}${socket}.h
+	${CPP} -o ${bin}${server}.o -c ${CPPFLAGS} ${src}${server}.cpp
+
+# objetivo client.o
+${bin}${client}.o: ${src}${client}.cpp ${head}${protocolo}.h ${head}${socket}.h
+	${CPP} -o ${bin}${client}.o -c ${CPPFLAGS} ${src}${client}.cpp
+
+# objetivo multihandler.o
+${bin}${multihandler}.o: ${src}${multihandler}.cpp ${head}${multihandler}.h
+	${CPP} -o ${bin}${multihandler}.o -c ${CPPFLAGS} ${src}${multihandler}.cpp
+
+# objetivo socket.o
+${bin}${socket}.o: ${src}${socket}.cpp ${head}${socket}.h
+	${CPP} -o ${bin}${socket}.o -c ${CPPFLAGS} ${src}${socket}.cpp
+
+.PHONY:clean
+# objetivo para eliminar objetos y programas
+clean:
+	$(RM) ${bin}*
+	$(RM) ${servidor}
+	$(RM) ${cliente}
+	$(RM) ${file}.zip
+	$(RM) html/
+	$(RM) latex/
+	$(RM) Doxyfile
+	
+.PHONY:zip
+# objetivo para comprimir los fuentes y el Makefile
+zip:
+	zip ${file}.zip -u Makefile ${src}${server}.cpp ${src}${client}.cpp ${head}${protocolo}.h ${src}${multihandler}.cpp ${head}${multihandler}.h ${src}${socket}.cpp ${head}${socket}.h
+
+#.PHONY:run
+# objetivo para compilar y ejecutar un servidor y tres clientes
+#run:all
+#	xterm -title 'Servidor' -e ./${servidor} 32000 &            #el servidor tarda en inicializar el socket y los clientes mueren al tratar de conectar con un puerto no usado
+#	xterm -title 'Cliente 1' -e ./${cliente} localhost 32000 &
+#	xterm -title 'Cliente 2' -e ./${cliente} localhost 32000 &
+#	xterm -title 'Cliente 3' -e ./${cliente} localhost 32000 &
+
+.PHONY:documentacion
+# objetivo para generar documentación
+documentacion: ${docu}
+${docu}: ${src}${server}.cpp ${src}${client}.cpp ${head}${protocolo}.h ${src}${multihandler}.cpp ${head}${multihandler}.h ${src}${socket}.cpp ${head}${socket}.h
+	doxygen -g
+	doxygen
