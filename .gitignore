@@ -54,3 +54,4 @@ dkms.conf
 *.cbp
 *.depend
 *.layout
+/Debug/
