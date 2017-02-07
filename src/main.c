@@ -60,13 +60,13 @@ void initializeAll(){
 
     FILE *file_map, *file_piece, *file_event;
 
-    if ((file_map = fopen("/data/maps/1.map", "r")) == NULL)
+    if ((file_map = fopen("/data/maps/1.maps", "r")) == NULL)
         exit(1);
 
-    if ((file_piece = fopen("/data/pieces/1.piece", "r")) == NULL)
+    if ((file_piece = fopen("/data/pieces/1.pieces", "r")) == NULL)
         exit(1);
 
-    if ((file_event = fopen("/data/events/1.event", "r")) == NULL)
+    if ((file_event = fopen("/data/events/1.events", "r")) == NULL)
         exit(1);
 
     ReadTableroFile(file_map, file_piece, &game_board);
