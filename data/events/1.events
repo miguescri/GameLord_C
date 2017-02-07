@@ -1,3 +1,25 @@
-#
+# example of event list
+#column row and priority
+16 9 1
+#activated
+1
+###
+#now events chained
+#event 1
+#type = MOVE_FROM_TO
+0
+# x0, y0, x1, y1
+16 9 10 14
 >
+#event 2
+#type = WAIT_TIME
+11
+#seconds 
+2
+>
+#event 3
+#type = MOVE_FROM_TO
+0
+# x0, y0, x1, y1
+10 14 16 9
 *

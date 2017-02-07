@@ -54,6 +54,7 @@ union id_event{
         uint16_t priority;
         uint16_t column;
         uint16_t row;
+        uint16_t stuffing;
     }position;
     uint64_t id;
 };
@@ -158,9 +159,9 @@ int WriteEventFile(FILE *file, Evento event);
 
 int WriteChainEventFile(FILE *file, Evento event);
 
-int ReadEventFile(FILE *file, Evento *event);
+int ReadEventFile(FILE *file, Evento **event);
 
-int ReadChainEventFile(FILE *file, Evento *event);
+int ReadChainEventFile(FILE *file, Evento **event);
 
 
 //Event_list operations
@@ -181,7 +182,7 @@ int StartIdEventList(Event_list *eventlist, union id_event identificator, Tabler
 
 int WriteEventListFile(FILE *file, Event_list eventlist);
 
-int ReadEventListFile(FILE *file, Event_list *eventlist);
+int ReadEventListFile(FILE *file, Event_list **eventlist);
 
 
 

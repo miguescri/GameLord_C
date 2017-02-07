@@ -12,11 +12,13 @@ bool SearchEventId(Event_list *eventlist, union id_event search_id, Event_list *
     bool found = FALSE;
     Event_list *aux = eventlist;
 
-    //If the priority is 0, it looks for the event with lower priority in that position that can be run
+    //If the priority is 0, it looks for the event with lower priority in that
+    //position that can be run
     if (search_id.position.priority == 0) {
         union  id_event lower_limit = search_id;
-        search_id.position.priority = -1;       //this way. search_id.id is the highest possible for that position
-        while (aux != NULL && aux->id_eventlist.id <= search_id.id && !found) {
+        search_id.position.priority = -1;
+            //this way search_id.id is the highest possible for that position
+        while (aux != NULL && aux->id_eventlist.id < search_id.id && !found) {
             if (aux->id_eventlist.id >= lower_limit.id && aux->activated) {
                 found = TRUE;
                 *event = aux;
@@ -87,7 +89,8 @@ void StartEvent(Evento *event, Tablero *board, Event_list *eventlist, struct lev
 
         switch (aux->type) {
             case MOVE_FROM_TO:
-                MovePiecePositionTablero(board, aux->params.MOVE_FROM_TO.x_init, aux->params.MOVE_FROM_TO.y_init, aux->params.MOVE_FROM_TO.x, aux->params.MOVE_FROM_TO.y);
+                MovePiecePositionTablero(board, aux->params.MOVE_FROM_TO.x_init,
+                    aux->params.MOVE_FROM_TO.y_init, aux->params.MOVE_FROM_TO.x, aux->params.MOVE_FROM_TO.y);
                 break;
 
             case MOVE_ID_TO:
@@ -122,7 +125,8 @@ void StartEvent(Evento *event, Tablero *board, Event_list *eventlist, struct lev
                 break;
 
             case CHANGE_TYPE_SQUARE:
-                ChangeTypeSquareTablero(board, aux->params.CHANGE_TYPE_SQUARE.x, aux->params.CHANGE_TYPE_SQUARE.y, aux->params.CHANGE_TYPE_SQUARE.type);
+                ChangeTypeSquareTablero(board, aux->params.CHANGE_TYPE_SQUARE.x,
+                    aux->params.CHANGE_TYPE_SQUARE.y, aux->params.CHANGE_TYPE_SQUARE.type);
                 break;
 
             case SHOW_TEXT:
@@ -144,11 +148,13 @@ void StartEvent(Evento *event, Tablero *board, Event_list *eventlist, struct lev
                 break;
 
             case CHANGE_DIRECTION_FROM:
-                DirectionPiecePositionTablero(board, aux->params.CHANGE_DIRECTION_FROM.x, aux->params.CHANGE_DIRECTION_FROM.y, aux->params.CHANGE_DIRECTION_FROM.direction);
+                DirectionPiecePositionTablero(board, aux->params.CHANGE_DIRECTION_FROM.x,
+                    aux->params.CHANGE_DIRECTION_FROM.y, aux->params.CHANGE_DIRECTION_FROM.direction);
                 break;
 
             case CHANGE_DIRECTION_ID:
-                DirectionPieceIdTablero(board, aux->params.CHANGE_DIRECTION_ID.id, aux->params.CHANGE_DIRECTION_ID.direction);
+                DirectionPieceIdTablero(board, aux->params.CHANGE_DIRECTION_ID.id,
+                    aux->params.CHANGE_DIRECTION_ID.direction);
                 break;
 
             case REFRESH_GRAPHICS:
@@ -283,7 +289,8 @@ int WriteEventListFile(FILE *file, Event_list eventlist){
 
     while (aux != NULL) {
         fprintf(file, "\n###EVENT LIST###\n#column, row and priority for the event chain to happen\n%"
-                SCNu16 " %" SCNu16 " %" SCNu16, aux->id_eventlist.position.column, aux->id_eventlist.position.row, aux->id_eventlist.position.priority);
+                SCNu16 " %" SCNu16 " %" SCNu16, aux->id_eventlist.position.column,
+                aux->id_eventlist.position.row, aux->id_eventlist.position.priority);
         fprintf(file, "\n#Chain activated (1 = activated, 0 = non-activated)\n%d", aux->activated);
         fprintf(file, "\n#List of chainned events:\n");
 
@@ -297,14 +304,18 @@ int WriteEventListFile(FILE *file, Event_list eventlist){
     return 0;
 }
 
-int ReadEventFile(FILE *file, Evento *event){
+int ReadEventFile(FILE *file, Evento **event){
     union event_params param;
     enum events type;
+    int auxnum;
 
     fscanf(file, "%u", &type);
 
     switch (type) {
     case MOVE_FROM_TO:
+        fscanf(file, "%" SCNu16 " %" SCNu16 " %" SCNu16 " %" SCNu16,
+            &param.MOVE_FROM_TO.x_init, &param.MOVE_FROM_TO.y_init,
+            &param.MOVE_FROM_TO.x, &param.MOVE_FROM_TO.y);
         break;
     case START_EVENT:
         break;
@@ -316,6 +327,9 @@ int ReadEventFile(FILE *file, Evento *event){
         break;
 
     case WAIT_TIME:
+        param.WAIT_TIME.time.tv_nsec = 0;
+        fscanf(file, "%d", &auxnum);
+        param.WAIT_TIME.time.tv_sec = auxnum;
         break;
     case WAIT_ACCEPT:
         break;
@@ -330,33 +344,35 @@ int ReadEventFile(FILE *file, Evento *event){
         break;
     }
 
-    event = CreateEvent(type, param);
+    *event = CreateEvent(type, param);
 
     return 0;
 }
 
-int ReadChainEventFile(FILE *file, Evento *event){
+int ReadChainEventFile(FILE *file, Evento **event){
     Evento *aux = NULL;
     char control;
 
     if (!feof(file)) {
         ReadEventFile(file, event);
-        fscanf(file, "%c", &control);
+        fscanf(file, "\n%c", &control);
     }
 
     while (control == '>' && !feof(file)) {
-        ReadEventFile(file, aux);
-        ChainEvent(event, aux);
-        fscanf(file, "%c", &control);
+        ReadEventFile(file, &aux);
+        ChainEvent(*event, aux);
+        fscanf(file, "\n%c", &control);
     }
 
     return 0;
 }
 
-int ReadEventListFile(FILE *file, Event_list *eventlist){
+int ReadEventListFile(FILE *file, Event_list **eventlist){
     Event_list *aux = NULL;
     Evento *eve = NULL;
-    union id_event id;
+    union id_event id; id.id = 0;
+        //si no se inicializan los 64 bits, queda basura en los de más
+        //peso imposibilitando la búsqueda por id
     bool activated;
 
     FILE *tmp = fopen("aux.txt", "w+");
@@ -368,8 +384,8 @@ int ReadEventListFile(FILE *file, Event_list *eventlist){
                &id.position.row, &id.position.priority );
         fscanf(tmp, "%u", &activated);
 
-        ReadChainEventFile(tmp, eve);
-        eventlist = CreateEventList(id, activated, eve);
+        ReadChainEventFile(tmp, &eve);
+        *eventlist = CreateEventList(id, activated, eve);
     }
 
     while (!feof(tmp)) {
@@ -377,9 +393,9 @@ int ReadEventListFile(FILE *file, Event_list *eventlist){
                &id.position.row, &id.position.priority );
         fscanf(tmp, "%u", &activated);
 
-        ReadChainEventFile(tmp, eventlist->event);
+        ReadChainEventFile(tmp, &eve);
         aux = CreateEventList(id, activated, eve);
-        AddEventList(&eventlist, aux);
+        AddEventList(eventlist, aux);
     }
 
     fclose(tmp);

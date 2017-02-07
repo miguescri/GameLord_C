@@ -60,40 +60,17 @@ void initializeAll(){
 
     FILE *file_map, *file_piece, *file_event;
 
-    if ((file_map = fopen("/data/maps/1.maps", "r")) == NULL)
-        exit(1);
+    if ((file_map = fopen("data/maps/1.maps", "r")) == NULL)
+        exit(2);
 
-    if ((file_piece = fopen("/data/pieces/1.pieces", "r")) == NULL)
-        exit(1);
+    if ((file_piece = fopen("data/pieces/1.pieces", "r")) == NULL)
+        exit(3);
 
-    if ((file_event = fopen("/data/events/1.events", "r")) == NULL)
-        exit(1);
+    if ((file_event = fopen("data/events/1.events", "r")) == NULL)
+        exit(4);
 
     ReadTableroFile(file_map, file_piece, &game_board);
-    ReadEventListFile(file_event, game_events);
-
- /*   union event_params params;
-    params.MOVE_FROM_TO.x_init = 16;
-    params.MOVE_FROM_TO.y_init = 9;
-    params.MOVE_FROM_TO.x = 10;
-    params.MOVE_FROM_TO.y = 14;
-
-    Evento *aux_event = CreateEvent(MOVE_FROM_TO, params);
-    params.WAIT_TIME.time.tv_nsec = 0;
-    params.WAIT_TIME.time.tv_sec = 2;
-    ChainEvent(aux_event, CreateEvent(WAIT_TIME,params));
-    params.MOVE_FROM_TO.x = 16;
-    params.MOVE_FROM_TO.y = 9;
-    params.MOVE_FROM_TO.x_init = 10;
-    params.MOVE_FROM_TO.y_init = 14;
-    ChainEvent(aux_event, CreateEvent(MOVE_FROM_TO,params));
-
-    union id_event id;
-    id.position.column = 16;
-    id.position.row = 9;
-    id.position.priority = 1;
-    game_events = CreateEventList(id, TRUE, aux_event);
-*/
+    ReadEventListFile(file_event, &game_events);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -169,11 +146,14 @@ void actionHandler(){
             case event:
             case jump:
                 MovePieceIdTablero(&game_board, main_character, x_destiny, y_destiny);
+
             //speaker is a event in which you can not occupy the position
             case speaker:
+                event_position.id = 0;
+                    //cleans the bits that will not be initialized in next lines
                 event_position.position.column = x_destiny;
                 event_position.position.row = y_destiny;
-                event_position.position.priority = 0;
+                event_position.position.priority = 1;
                 StartIdEventList(game_events, event_position, &game_board, &game_info);
                 break;
 
