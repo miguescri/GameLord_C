@@ -23,6 +23,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #define LONGNOMBRE 1
 

@@ -54,7 +54,9 @@ void DestroyTablero(Tablero *board){
     board->conjunto_piezas = NULL;
     free(board->conjunto_casillas);
     board->conjunto_casillas = NULL;
-
+    board->piezas_guardadas = 0;
+    board->filas = 0;
+    board->columnas = 0;
 }
 
 void infoTablero(Tablero board, int *number_pieces, int *number_rows, int *number_columns){
@@ -272,6 +274,19 @@ int UnsetPiecePositionTablero(Tablero *board, uint16_t x, uint16_t y){
 }
 
 int ReadTableroFile(FILE *file_board, FILE *file_pieces, Tablero *board){
+    ReadBoardFile(file_board, board->filas, board->columnas, board->conjunto_casillas);
+    Pieza aux;
+    FILE *tmp = fopen("aux.txt", "w+");
+    comment_eraser(file_pieces, tmp);
+    fseek(tmp, 0, SEEK_SET);
+    while (!feof(tmp)) {
+        ReadPiezaFile(tmp, &aux);
+        AddPieceTablero(board, aux);
+        SetPieceIdTablero(board, aux.identificador);
+    }
+
+    fclose(tmp);
+
     return 0;
 }
 

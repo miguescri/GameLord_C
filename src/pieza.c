@@ -174,21 +174,28 @@ void ShowNamePieza(Pieza m, int p){
 }
 
 int WritePiezaFile(FILE *file, Pieza piece){
-    fprintf(file, "\n# Piece ID\n%ju", piece.identificador);
+    fprintf(file, "\n# Piece ID\n%" SCNu32, piece.identificador);
     fprintf(file, "\n# Name\n%s", piece.nombre);
-    fprintf(file, "\n# Type\n%u", piece.tipo);
-    fprintf(file, "\n# X and Y position\n%u %u", piece.posicion_x, piece.posicion_y);
-    fprintf(file, "\n# Status (0 = out of the game board)\n%u", piece.estado);
-    fprintf(file, "\n# Team\n%ju", piece.equipo);
+    fprintf(file, "\n# Type\n%" SCNu8, piece.tipo);
+    fprintf(file, "\n# X and Y position\n%" SCNu8 " %" SCNu8, piece.posicion_x, piece.posicion_y);
+    fprintf(file, "\n# Status (0 = out of the game board)\n%" SCNu8, piece.estado);
+    fprintf(file, "\n# Team\n%" SCNu8, piece.equipo);
+    fprintf(file, "\n# Direction\n%" SCNu8, piece.direccion);
 
     return 0;
 }
 
 int ReadPiezaFile(FILE *file, Pieza *piece){
-    char cadena[LONGNOMBRE];
-    fscanf(file, "%ju\n%s\n%u\n%u %u\n%u\n%ju", &piece->identificador, cadena,
-           &piece->tipo, &piece->identificador, &piece->posicion_x,
-           &piece->posicion_y, &piece->estado, &piece->equipo);
+    char cadena[128];
+
+    fscanf(file, "%" SCNu32, &piece->identificador);
+    fscanf(file, "%s", cadena);
+    fscanf(file, "%" SCNu8, &piece->tipo);
+    fscanf(file, "%" SCNu16 " %" SCNu16, &piece->posicion_x, &piece->posicion_y);
+    fscanf(file, "%" SCNu8, &piece->estado);
+    fscanf(file, "%" SCNu8, &piece->equipo);
+    fscanf(file, "%" SCNu8, &piece->direccion);
+
     WriteNamePieza(piece, cadena);
 
     return 0;

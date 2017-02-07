@@ -1,13 +1,15 @@
 
 # Piece ID
-0
+1111
 # Name
-
+h
 # Type
 0
 # X and Y position
-23936 64
+10 8
 # Status (0 = out of the game board)
-240
+6
 # Team
-0
+8
+# Direction
+3

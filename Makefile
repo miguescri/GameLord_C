@@ -51,7 +51,7 @@ parser  := comment_eraser
 square_o    := ${bin}${piece}.o ${bin}${square}.o
 square_h    := ${head}${piece}.h ${head}${square}.h 
 board_o     := ${bin}${board}.o ${square_o}
-board_h     := ${head}${board}.h ${square_h} ${head}${parser}
+board_h     := ${head}${board}.h ${square_h} ${head}${parser}.h
 graphics_h  := ${head}${graphics}.h ${board_h}
 event_h     := ${head}${event}.h ${board_h} ${graphics_h} 
 

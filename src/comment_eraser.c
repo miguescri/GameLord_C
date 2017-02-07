@@ -475,36 +475,16 @@ char *yytext;
     #include <unistd.h>
     #include "comment_eraser.h"
     
-    int limpiar_fichero(FILE *entrada, FILE *salida){
-        dup(0);
-            //stdin queda en la posición 3 de la tabla de descriptores
-        close(0);
-        dup(fileno(entrada));
-            //in.fileno queda en la posición 0 de la tabla de descriptores
-            //siendo la entrada por defecto
-        dup(1);
-            //stdout queda en la posición 4 de la tabla de descriptores
-
-        close(1);
-        dup(fileno(salida));
-            //out.fileno queda en la posición 1 de la tabla de descriptores
-            //siendo la salida por defecto
-
+    
+    int comment_eraser(FILE *entrada, FILE *salida){
+        yyset_in(entrada);
+        yyset_out(salida);
         yylex();
-
-        close(0);
-        dup(3);
-        close(3);
-            //restaura stdin como la entrada por defecto
-        close(1);
-        dup(4);
-        close(4);
-            //restaura stdout como la salida por defecto
-            
+        
         return 0;
     }
 
-#line 508 "src/comment_eraser.c"
+#line 488 "src/comment_eraser.c"
 
 #define INITIAL 0
 
@@ -694,10 +674,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 45 "src/comment_eraser.l"
+#line 25 "src/comment_eraser.l"
 
 
-#line 701 "src/comment_eraser.c"
+#line 681 "src/comment_eraser.c"
 
 	if ( !(yy_init) )
 		{
@@ -784,27 +764,27 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 47 "src/comment_eraser.l"
+#line 27 "src/comment_eraser.l"
 {/*elimina líneas de comentario*/} 
 	YY_BREAK
 case 2:
 /* rule 2 can match eol */
 YY_RULE_SETUP
-#line 48 "src/comment_eraser.l"
-{printf("%s", yytext); /*elimina los espacios al comienzo de línea*/}
+#line 28 "src/comment_eraser.l"
+{fprintf(yyout, "%s", yytext); /*elimina los espacios al comienzo de línea*/}
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 49 "src/comment_eraser.l"
+#line 29 "src/comment_eraser.l"
 {/*limpia líneas vacías*/}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 52 "src/comment_eraser.l"
+#line 32 "src/comment_eraser.l"
 ECHO;
 	YY_BREAK
-#line 808 "src/comment_eraser.c"
+#line 788 "src/comment_eraser.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1805,7 +1785,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 52 "src/comment_eraser.l"
+#line 32 "src/comment_eraser.l"
 
 
 /*

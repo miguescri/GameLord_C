@@ -16,6 +16,6 @@
  * \return int
  *
  */
-int limpiar_fichero(FILE *entrada, FILE *salida);
+int comment_eraser(FILE *entrada, FILE *salida);
 
 #endif // COMMENT_ERASER_H_INCLUDED

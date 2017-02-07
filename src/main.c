@@ -39,7 +39,7 @@ bool continue_game = TRUE;
 
 //////MAIN//////////////////////////////////////////////////////////////////
 int main(){
- /*   initializeAll();
+    initializeAll();
     Refresh_GFX();
 
     while(continue_game){
@@ -49,15 +49,8 @@ int main(){
     }
 
     endAll();
-*/
-Pieza pie;
-FILE *fi2 = fopen("pieza2.piece", "r");
-ReadPiezaFile(fi2, &pie);
-fclose(fi2);
 
-FILE *fi = fopen("pieza.piece", "w");
-WritePiezaFile(fi, pie);
-fclose(fi);
+
     return 0;
 }
 
@@ -65,16 +58,15 @@ fclose(fi);
 void initializeAll(){
     CreateTablero(&game_board, 24, 32);
 
-    FILE *file;
+    FILE *file_map, *file_piece;
 
-    if ((file = fopen("/home/miguescri/Documentos/Codigos_CB_c/1.map", "r")) == NULL)
+    if ((file_map = fopen("/home/miguescri/Documentos/Codigos_CB_c/data/maps/1.map", "r")) == NULL)
         exit(1);
 
-    ReadBoardFile(file, game_board.filas, game_board.columnas, game_board.conjunto_casillas);
+    if ((file_piece = fopen("/home/miguescri/Documentos/Codigos_CB_c/data/pieces/1.piece", "r")) == NULL)
+        exit(1);
 
-    Pieza p = MakePieza(30, 10, 6, "xXx", 1, PIECE_ON_BOARD, main_character, 1);
-    AddPieceTablero(&game_board, p);
-    SetPieceIdTablero(&game_board, main_character);
+    ReadTableroFile(file_map, file_piece, &game_board);
 
     union event_params params;
     params.MOVE_FROM_TO.x_init = 16;

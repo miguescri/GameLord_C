@@ -14,6 +14,7 @@
 
 #include <stdlib.h>
 #include "casilla.h"
+#include "pieza.h"
 #include "comment_eraser.h"
 
 
