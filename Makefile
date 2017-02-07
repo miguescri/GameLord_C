@@ -106,7 +106,7 @@ ${src}${parser}.c:  ${src}${parser}.l
 .PHONY:clean
 # objetivo para eliminar objetos, programas y ficheros no indispensables
 clean:
-	$(RM) ${bin}*.o
+	$(RM) ${bin}*
 	$(RM) ${game}
 	$(RM) ${file}.zip
 	$(RM) ${docu}
@@ -114,7 +114,7 @@ clean:
 .PHONY:zip
 # objetivo para comprimir los fuentes y el Makefile
 zip:
-	zip ${file}.zip -u Makefile ${src}$* ${head}*
+	zip ${file}.zip -u Makefile ${src}* ${head}*
 
 
 .PHONY:documents

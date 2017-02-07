@@ -58,17 +58,21 @@ int main(){
 void initializeAll(){
     CreateTablero(&game_board, 24, 32);
 
-    FILE *file_map, *file_piece;
+    FILE *file_map, *file_piece, *file_event;
 
-    if ((file_map = fopen("/home/miguescri/Documentos/Codigos_CB_c/data/maps/1.map", "r")) == NULL)
+    if ((file_map = fopen("/data/maps/1.map", "r")) == NULL)
         exit(1);
 
-    if ((file_piece = fopen("/home/miguescri/Documentos/Codigos_CB_c/data/pieces/1.piece", "r")) == NULL)
+    if ((file_piece = fopen("/data/pieces/1.piece", "r")) == NULL)
+        exit(1);
+
+    if ((file_event = fopen("/data/events/1.event", "r")) == NULL)
         exit(1);
 
     ReadTableroFile(file_map, file_piece, &game_board);
+    ReadEventListFile(file_event, game_events);
 
-    union event_params params;
+ /*   union event_params params;
     params.MOVE_FROM_TO.x_init = 16;
     params.MOVE_FROM_TO.y_init = 9;
     params.MOVE_FROM_TO.x = 10;
@@ -89,7 +93,7 @@ void initializeAll(){
     id.position.row = 9;
     id.position.priority = 1;
     game_events = CreateEventList(id, TRUE, aux_event);
-
+*/
 }
 
 ////////////////////////////////////////////////////////////////////////////

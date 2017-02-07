@@ -87,6 +87,7 @@ int UnsetPiecePositionTablero(Tablero *board, uint16_t x, uint16_t y);
 
 int ReadTableroFile(FILE *file_board, FILE *file_pieces, Tablero *board);
 
+/*TODO: writetablerofile*/
 
 
 

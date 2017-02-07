@@ -2,7 +2,7 @@
     Module: evento.c
     Author: Miguel Escribano Perez (miguescri)
     Creation date: 24 December 2016
-    Last modification: 13 November 2016
+    Last modification: 7 February 2017
 
 */
 
@@ -269,11 +269,11 @@ int WriteChainEventFile(FILE *file, Evento event){
     WriteEventFile(file, event);
 
     while (aux != NULL) {
-        fprintf(file, "\n>>>>>");
+        fprintf(file, "\n>");
         WriteEventFile(file, *aux);
         aux = aux->chain;
     }
-    fprintf(file, "\n*****");
+    fprintf(file, "\n*");
 
     return 0;
 }
@@ -282,8 +282,9 @@ int WriteEventListFile(FILE *file, Event_list eventlist){
     Event_list *aux = &eventlist;
 
     while (aux != NULL) {
-        fprintf(file, "\n###EVENT LIST###\n#column, row and priority for the event chain to happen\n%du %du %du", aux->id_eventlist.position.column, aux->id_eventlist.position.row, aux->id_eventlist.position.priority);
-        fprintf(file, "\n#Chain activated (1 = activated, 0 = non-activated)\n%du", aux->activated);
+        fprintf(file, "\n###EVENT LIST###\n#column, row and priority for the event chain to happen\n%"
+                SCNu16 " %" SCNu16 " %" SCNu16, aux->id_eventlist.position.column, aux->id_eventlist.position.row, aux->id_eventlist.position.priority);
+        fprintf(file, "\n#Chain activated (1 = activated, 0 = non-activated)\n%d", aux->activated);
         fprintf(file, "\n#List of chainned events:\n");
 
         WriteChainEventFile(file, *aux->event);
@@ -297,79 +298,91 @@ int WriteEventListFile(FILE *file, Event_list eventlist){
 }
 
 int ReadEventFile(FILE *file, Evento *event){
+    union event_params param;
+    enum events type;
+
+    fscanf(file, "%u", &type);
+
+    switch (type) {
+    case MOVE_FROM_TO:
+        break;
+    case START_EVENT:
+        break;
+
+    case SHOW_TEXT:
+        break;
+
+    case HIDE_TEXT:
+        break;
+
+    case WAIT_TIME:
+        break;
+    case WAIT_ACCEPT:
+        break;
+    case REFRESH_GRAPHICS:
+        break;
+    case CHANGE_LEVEL:
+        break;
+    case CHANGE_SUBLEVEL:
+        break;
+
+    default:
+        break;
+    }
+
+    event = CreateEvent(type, param);
 
     return 0;
 }
 
 int ReadChainEventFile(FILE *file, Evento *event){
-    Evento *aux;
-    char *text;
-    int error;
-    size_t n;
+    Evento *aux = NULL;
+    char control;
 
-    ReadEventFile(file, event);
-
-    do{
-        if ( (error = getline(&text, &n, file)) == -1) {
-            free(text);
-            return error;
-        }
-    } while (text[0] != '>' && text[0] != '*');
-
-    while (text[0] == '>') {
-        if ((aux = calloc(1, sizeof(Evento))) == NULL) {
-            write(STDERR_FILENO, "\nError when allocating memory for read event\n", 47);
-            exit(1);
-        }
-        ReadEventFile(file, aux);
-        ChainEvent(event, aux);
-
-        do{
-            if ( (error = getline(&text, &n, file)) == -1) {
-                free(text);
-                return error;
-            }
-        } while (text[0] != '>' && text[0] != '*');
+    if (!feof(file)) {
+        ReadEventFile(file, event);
+        fscanf(file, "%c", &control);
     }
 
-    free(text);
+    while (control == '>' && !feof(file)) {
+        ReadEventFile(file, aux);
+        ChainEvent(event, aux);
+        fscanf(file, "%c", &control);
+    }
+
     return 0;
 }
 
 int ReadEventListFile(FILE *file, Event_list *eventlist){
-    Event_list *aux;
-    char *text;
-    int error;
-    size_t n;
+    Event_list *aux = NULL;
+    Evento *eve = NULL;
+    union id_event id;
+    bool activated;
 
-    fscanf(file, "%u %u %u\n", &eventlist->id_eventlist.position.column, &eventlist->id_eventlist.position.row, &eventlist->id_eventlist.position.priority );
-    fscanf(file, "%u\n", &eventlist->activated);
+    FILE *tmp = fopen("aux.txt", "w+");
+    comment_eraser(file, tmp);
+    fseek(tmp, 0, SEEK_SET);
 
-    ReadChainEventFile(file, eventlist->event);
+    if (!feof(tmp)) {
+        fscanf(tmp, "%" SCNu16 " %" SCNu16 " %" SCNu16, &id.position.column,
+               &id.position.row, &id.position.priority );
+        fscanf(tmp, "%u", &activated);
 
-    do{
-        if ( (error = getline(&text, &n, file)) == -1) {
-            free(text);
-            return error;
-        }
-    } while (text[0] != '*');
-
-    while (text[0] == '*') {
-        if ((aux = calloc(1, sizeof(Event_list))) == NULL) {
-            write(STDERR_FILENO, "\nError when allocating memory for read event\n", 47);
-            exit(1);
-        }
-        ReadChainEventFile(file, aux->event);
-        AddEventList(&eventlist, aux);
-
-        do{
-            if ( (error = getline(&text, &n, file)) == -1) {
-                free(text);
-                return error;
-            }
-        } while (text[0] != '*');
+        ReadChainEventFile(tmp, eve);
+        eventlist = CreateEventList(id, activated, eve);
     }
 
-    free(text);
+    while (!feof(tmp)) {
+        fscanf(tmp, "%" SCNu16 " %" SCNu16 " %" SCNu16, &id.position.column,
+               &id.position.row, &id.position.priority );
+        fscanf(tmp, "%u", &activated);
+
+        ReadChainEventFile(tmp, eventlist->event);
+        aux = CreateEventList(id, activated, eve);
+        AddEventList(&eventlist, aux);
+    }
+
+    fclose(tmp);
+
     return 0;
 }
