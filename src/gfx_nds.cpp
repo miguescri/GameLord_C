@@ -1,14 +1,32 @@
 #include "gfx_interface.h"
+#include "gfx_unifier.h"
 
 #include <nds.h>
 #include <maxmod9.h>
 #include <assert.h>
 #include "sprites.h"
 
+const int num_sprites = 128;
+SpriteInfo spriteInfo[num_sprites];
+OAMTable *oam;
+static const int DMA_CHANNEL = 3;
+
+int ncolumns,
+    nrows,
+    square_width,
+    square_height;
+    
+const int SCREEN_WIDTH = 256,
+        SCREEN_HEIGHT = 192;
+
 void initVideo();
 void initBackgrounds();
+void initSprites();
 
 int InitGFX(){
+    gfx_load();
+        //loads all the data generated in .h files by grit
+    
     /*  Turn on the 2D graphics core. */
     powerOn(POWER_ALL_2D);
 
@@ -22,6 +40,9 @@ int InitGFX(){
     initVideo();
     initBackgrounds();
     
+    oam = new OAMTable();
+    initOAM(oam);
+    
     return 0;
 }
 
@@ -30,16 +51,26 @@ int ShutGFX(){
 }
 
 int Refresh_GFX(){
-    ShowBoard(game_board.filas, game_board.columnas, LONGNOMBRE, game_board.conjunto_casillas);
-    printf("\n");
+    swiWaitForVBlank();
+    updateOAM(oam);
+    
     return 0;
 }
 
+//this should distinguish between screens when grilling
 int SetGrill(enum screen where, uint16_t rows, uint16_t columns){
+    ncolumns = columns;
+    nrows = rows;
+    square_width = SCREEN_WIDTH/columns;
+    square_height = SCREEN_HEIGHT/rows;
+    
     return 0;
 }
 
 int ReadGrill(enum screen where, uint16_t *rows, uint16_t *columns){
+    *rows = nrows;
+    *columns = ncolumns;
+    
     return 0;
 }
 
@@ -175,4 +206,171 @@ void initBackgrounds() {
      */
     REG_BG3X_SUB = 0;
     REG_BG3Y_SUB = 0;
+}
+
+void initSprites() {
+    /*  Define some sprite configuration specific constants.
+     *
+     *  We will use these to compute the proper index into memory for certain
+     *  tiles or palettes.
+     *
+     *  OFFSET_MULTIPLIER is calculated based on the following formula from
+     *  GBATEK (http://nocash.emubase.de/gbatek.htm#dsvideoobjs):
+     *      TileVramAddress = TileNumber * BoundaryValue
+     *  Since SPRITE_GFX is a uint16*, the compiler will increment the address
+     *  it points to by 2 for each change in 1 of the array index into
+     *  SPRITE_GFX. (The compiler does pointer arithmetic.)
+     */
+    static const int BYTES_PER_16_COLOR_TILE = 32;
+    static const int COLORS_PER_PALETTE = 16;
+    static const int BOUNDARY_VALUE = 32; /* This is the default boundary value
+                                           * (can be set in REG_DISPCNT) */
+    static const int OFFSET_MULTIPLIER = BOUNDARY_VALUE /
+                                         sizeof(SPRITE_GFX[0]);
+
+    /* Keep track of the available tiles */
+    int nextAvailableTileIdx = 0;
+
+    /* Create the ship sprite. */
+    static const int SHUTTLE_OAM_ID = 0;
+    assert(SHUTTLE_OAM_ID < SPRITE_COUNT);
+    SpriteInfo * shuttleInfo = &spriteInfo[SHUTTLE_OAM_ID];
+    SpriteEntry * shuttle = &oam->oamBuffer[SHUTTLE_OAM_ID];
+
+    /* Initialize shuttleInfo */
+    shuttleInfo->oamId = SHUTTLE_OAM_ID;
+    shuttleInfo->width = 16;
+    shuttleInfo->height = 16;
+    shuttleInfo->angle = 29568;
+    shuttleInfo->entry = shuttle;
+
+    /*
+     *  Configure attribute 0.
+     *
+     *  OBJCOLOR_16 will make a 16-color sprite. We specify that we want an
+     *  affine sprite (via isRotateScale) here because we would like to rotate
+     *  the ship.
+     */
+    shuttle->y = SCREEN_HEIGHT / 2 - shuttleInfo->height;
+    shuttle->isRotateScale = true;
+    /* This assert is a check to see a matrix is available to store the affine
+     * transformation matrix for this sprite. Of course, you don't have to have
+     * the matrix id match the affine id, but if you do make them match, this
+     * assert can be helpful. */
+    assert(!shuttle->isRotateScale || (shuttleInfo->oamId < MATRIX_COUNT));
+    shuttle->isSizeDouble = false;
+    shuttle->blendMode = OBJMODE_NORMAL;
+    shuttle->isMosaic = false;
+    shuttle->colorMode = OBJCOLOR_16;
+    shuttle->shape = OBJSHAPE_SQUARE;
+
+    /*
+     *  Configure attribute 1.
+     *
+     *  rsMatrixId refers to the loation of affine transformation matrix. We
+     *  set it to a location computed with a macro. OBJSIZE_64, in our case
+     *  since we are making a square sprite, creates a 64x64 sprite.
+     */
+    shuttle->x = SCREEN_WIDTH / 2 - shuttleInfo->width * 2 +
+                    shuttleInfo->width / 2;
+    shuttle->rotationIndex = shuttleInfo->oamId;
+    shuttle->size = OBJSIZE_64;
+
+    /*
+     *  Configure attribute 2.
+     *
+     *  Configure which tiles the sprite will use, which priority layer it will
+     *  be placed onto, which palette the sprite should use, and whether or not
+     *  to show the sprite.
+     */
+    shuttle->gfxIndex = nextAvailableTileIdx;
+    nextAvailableTileIdx += orangeShuttleTilesLen / BYTES_PER_16_COLOR_TILE;
+    shuttle->priority = OBJPRIORITY_0;
+    shuttle->palette = shuttleInfo->oamId;
+
+    /* Rotate the sprite */
+    rotateSprite(&oam->matrixBuffer[shuttleInfo->oamId],
+                 shuttleInfo->angle);
+
+    /*************************************************************************/
+
+    /* Create the moon sprite. */
+    static const int MOON_OAM_ID = 1;
+    assert(MOON_OAM_ID < SPRITE_COUNT);
+    SpriteInfo * moonInfo = &spriteInfo[MOON_OAM_ID];
+    SpriteEntry * moon = &oam->oamBuffer[MOON_OAM_ID];
+
+    /* Initialize moonInfo */
+    moonInfo->oamId = MOON_OAM_ID;
+    moonInfo->width = 16;
+    moonInfo->height = 16;
+    moonInfo->angle = 29568;
+    moonInfo->entry = moon;
+
+    /*
+     *  Configure attribute 0.
+     *
+     *  OBJCOLOR_16 will make a 16-color sprite. We won't specify that we want
+     *  an affine sprite here because we don't want one this time.
+     */
+    moon->y = SCREEN_WIDTH / 2 + moonInfo->height / 2;
+    moon->isRotateScale = false;
+    /* This assert is a check to see a matrix is available to store the affine
+     * transformation matrix for this sprite. Of course, you don't have to have
+     * the matrix id match the affine id, but if you do make them match, this
+     * assert can be helpful. */
+    assert(!moon->isRotateScale || (moonInfo->oamId < MATRIX_COUNT));
+    moon->isHidden = false;
+    moon->blendMode = OBJMODE_NORMAL;
+    moon->isMosaic = false;
+    moon->colorMode = OBJCOLOR_16;
+    moon->shape = OBJSHAPE_SQUARE;
+
+    /*
+     * Configure attribute 1.
+     *
+     * OBJSIZE_32 will create a sprite of size 32x32, since we are making a
+     * square sprite. Since we are using a non-affine sprite, attribute 1
+     * doesn't have an rotationIndex anymore. Instead, it has the ability to flip
+     * the sprite vertically or horizontally.
+     */
+    moon->x = SCREEN_WIDTH / 2 + moonInfo->width + moonInfo->width / 2;
+    moon->hFlip = false;
+    moon->vFlip = false;
+    moon->size = OBJSIZE_32;
+
+    /*
+     *  Configure attribute 2.
+     *
+     *  Configure which tiles the sprite will use, which priority layer it will
+     *  be placed onto, which palette the sprite should use, and whether or not
+     *  to show the sprite.
+     */
+    moon->gfxIndex = nextAvailableTileIdx;
+    nextAvailableTileIdx += moonTilesLen / BYTES_PER_16_COLOR_TILE;
+    moon->priority = OBJPRIORITY_2;
+    moon->palette = moonInfo->oamId;
+
+    /*************************************************************************/
+
+    /* Copy over the sprite palettes */
+    dmaCopyHalfWords(SPRITE_DMA_CHANNEL,
+                     orangeShuttlePal,
+                     &SPRITE_PALETTE[shuttleInfo->oamId *
+                                     COLORS_PER_PALETTE],
+                     orangeShuttlePalLen);
+    dmaCopyHalfWords(SPRITE_DMA_CHANNEL,
+                     moonPal,
+                     &SPRITE_PALETTE[moonInfo->oamId * COLORS_PER_PALETTE],
+                     moonPalLen);
+
+    /* Copy the sprite graphics to sprite graphics memory */
+    dmaCopyHalfWords(SPRITE_DMA_CHANNEL,
+                     orangeShuttleTiles,
+                     &SPRITE_GFX[shuttle->gfxIndex * OFFSET_MULTIPLIER],
+                     orangeShuttleTilesLen);
+    dmaCopyHalfWords(SPRITE_DMA_CHANNEL,
+                     moonTiles,
+                     &SPRITE_GFX[moon->gfxIndex * OFFSET_MULTIPLIER],
+                     moonTilesLen);
 }

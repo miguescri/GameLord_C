@@ -1,7 +1,6 @@
 #ifndef GFX_INTERFACE_H_INCLUDED
 #define GFX_INTERFACE_H_INCLUDED
 
-#include "tablero.h"
 
 #ifndef BOOLEAN
 #define BOOLEAN
