@@ -82,6 +82,29 @@ int AddPieceTablero(Tablero *board, Pieza piece){
     return 0;
 }
 
+int InitPieceIterator(Tablero *board){
+    if (board->piezas_guardadas > 0) {
+        board->iterador_piezas = 0;
+    } else {
+        board->iterador_piezas = -1;
+    }
+}
+
+int IteratePiece(Tablero *board, Pieza *piece){
+    if (board->iterador_piezas >= 0 && board->iterador_piezas < board->piezas_guardadas) {
+        *piece = board->conjunto_piezas[board->iterador_piezas];
+        if (board->iterador_piezas+1 >= board->piezas_guardadas) {
+            board->iterador_piezas = -1;
+        } else {
+            board->iterador_piezas += 1;
+        }
+
+        return 0;
+    } else {
+        return -1;
+    }
+}
+
 int ChangeTypeSquareTablero(Tablero *board, uint16_t x, uint16_t y, uint8_t type){
     return WriteTypeCasilla(board->filas, board->columnas, x, y, board->conjunto_casillas, type);
 }
@@ -286,6 +309,7 @@ int ReadTableroFile(FILE *file_board, FILE *file_pieces, Tablero *board){
     }
 
     fclose(tmp);
+        //hay que encontrar una forma de eliminar el fichero temporal
 
     return 0;
 }

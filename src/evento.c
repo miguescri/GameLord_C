@@ -40,7 +40,36 @@ bool SearchEventId(Event_list *eventlist, union id_event search_id, Event_list *
 }
 
 int UpdateSpriteInfo(Tablero board, struct level_info info){
+    Pieza aux;
+
+    //esto se puede hacer de forma mucho más eficiente guardando la info de
+    //sprites existentes (posible función para gfx_interface) y modificando aquellos
+    //que hayan cambiado, en vez de borrar todo y empezar de 0
+    Remove_All_Sprites();
+    InitPieceIterator(&board);
+    while (IteratePiece(&board, &aux) != -1) {
+        uint16_t first_seen_column = info.visible_upper_left_x,
+            first_seen_row  = info.visible_upper_left_y,
+            last_seen_column = info.visible_upper_left_x + info.visible_horizontal_squares,
+            last_seen_row   = info.visible_upper_left_x + info.visible_vertical_squares,
+            x_piece         = ReadXAxisPieza(aux),
+            y_piece         = ReadYAxisPieza(aux);
+
+        if (ReadStatusPieza(aux) != PIECE_OUT_OF_BOARD &&
+            x_piece >= first_seen_column &&
+            x_piece < last_seen_column &&
+            y_piece >= first_seen_row &&
+            y_piece < last_seen_row) {
+            Create_Sprite(ReadIdPieza(aux), ReadTypePieza(aux),
+                ReadDirectionPieza(aux), x_piece - first_seen_column,
+                y_piece - first_seen_row, TRUE);
+                //el gestor de sprites necesita la posición relativa
+                //de la pieza dentro de la ventana visible
+        }
+    }
+
     Refresh_GFX();
+
     return 0;
 }
 
@@ -80,9 +109,13 @@ void DestroyEvent(Evento **event){
     *event = NULL;
 }
 
-void StartEvent(Evento *event, Tablero *board, Event_list *eventlist, struct level_info *info){
+void StartEvent(Evento *event, Tablero *board, Event_list **eventlist, struct level_info *info){
     Evento *aux = event, *next;
     Event_list *aux_list;
+    FILE *file_board, *file_pieces, *file_event;
+    char *board_sufix = "x.maps",
+        *piece_sufix = "x.pieces",
+        *event_sufix = "x.events";
 
     while (aux != NULL) {
         next = aux->chain;
@@ -111,17 +144,17 @@ void StartEvent(Evento *event, Tablero *board, Event_list *eventlist, struct lev
 
             case START_EVENT:
                 aux_list = NULL;
-                SearchEventId(eventlist, aux->params.START_EVENT.id, &aux_list);
+                SearchEventId(*eventlist, aux->params.START_EVENT.id, &aux_list);
                 if (aux_list != NULL)
                     next = aux_list->event;
                 break;
 
             case ACTIVATE_EVENT:
-                ActivateIdEventList(eventlist, aux->params.ACTIVATE_EVENT.id);
+                ActivateIdEventList(*eventlist, aux->params.ACTIVATE_EVENT.id);
                 break;
 
             case DEACTIVATE_EVENT:
-                DeactivateIdEventList(eventlist, aux->params.DEACTIVATE_EVENT.id);
+                DeactivateIdEventList(*eventlist, aux->params.DEACTIVATE_EVENT.id);
                 break;
 
             case CHANGE_TYPE_SQUARE:
@@ -162,9 +195,40 @@ void StartEvent(Evento *event, Tablero *board, Event_list *eventlist, struct lev
                 break;
 
             case CHANGE_LEVEL:
+                DestroyTablero(board);
+                DestroyEventList(eventlist);
+
+                //esta solución no es escalable a más de 10 niveles
+                board_sufix[0] = aux->params.CHANGE_LEVEL.level + '0';
+                file_board = fopen(board_sufix, "r");
+                piece_sufix[0] = aux->params.CHANGE_LEVEL.level + '0';
+                file_pieces = fopen(piece_sufix, "r");
+                event_sufix[0] = aux->params.CHANGE_LEVEL.level + '0';
+                file_event = fopen(event_sufix, "r");
+
+                ReadTableroFile(file_board, file_pieces, board);
+                ReadEventListFile(file_event, eventlist);
+
+                fclose(file_board);
+                fclose(file_pieces);
+                fclose(file_event);
+
+                info->level = aux->params.CHANGE_LEVEL.level;
+                info->sub_level = aux->params.CHANGE_LEVEL.sublevel;
+                info->visible_upper_left_x = aux->params.CHANGE_LEVEL.visible_upper_left_x;
+                info->visible_upper_left_y = aux->params.CHANGE_LEVEL.visible_upper_left_y;
+
+                print_background(SCREEN_SECONDARY, aux->params.CHANGE_LEVEL.level, 1);
+                print_background(SCREEN_MAIN, aux->params.CHANGE_LEVEL.sublevel, 1);
+                UpdateSpriteInfo(*board, *info);
                 break;
 
             case CHANGE_SUBLEVEL:
+                info->sub_level = aux->params.CHANGE_SUBLEVEL.sublevel;
+                info->visible_upper_left_x = aux->params.CHANGE_SUBLEVEL.visible_upper_left_x;
+                info->visible_upper_left_y = aux->params.CHANGE_SUBLEVEL.visible_upper_left_y;
+                print_background(SCREEN_MAIN, aux->params.CHANGE_SUBLEVEL.sublevel, 1);
+                UpdateSpriteInfo(*board,*info);
                 break;
 
             case SAVE_CHECKPOINT:
@@ -254,9 +318,9 @@ int DeactivateIdEventList(Event_list *eventlist, union id_event identificator){
     }
 }
 
-int StartIdEventList(Event_list *eventlist, union id_event identificator, Tablero *board, struct level_info *info){
+int StartIdEventList(Event_list **eventlist, union id_event identificator, Tablero *board, struct level_info *info){
     Event_list *aux_list = NULL;
-    SearchEventId(eventlist, identificator, &aux_list);
+    SearchEventId(*eventlist, identificator, &aux_list);
     if (aux_list != NULL) {
         StartEvent(aux_list->event, board, eventlist, info);
         return TRUE;
@@ -312,36 +376,64 @@ int ReadEventFile(FILE *file, Evento **event){
     fscanf(file, "%u", &type);
 
     switch (type) {
-    case MOVE_FROM_TO:
-        fscanf(file, "%" SCNu16 " %" SCNu16 " %" SCNu16 " %" SCNu16,
-            &param.MOVE_FROM_TO.x_init, &param.MOVE_FROM_TO.y_init,
-            &param.MOVE_FROM_TO.x, &param.MOVE_FROM_TO.y);
-        break;
-    case START_EVENT:
-        break;
+        case MOVE_FROM_TO:
+            fscanf(file, "%" SCNu16 " %" SCNu16 " %" SCNu16 " %" SCNu16,
+                &param.MOVE_FROM_TO.x_init, &param.MOVE_FROM_TO.y_init,
+                &param.MOVE_FROM_TO.x, &param.MOVE_FROM_TO.y);
+            break;
 
-    case SHOW_TEXT:
-        break;
+        case UNSET_ID:
+            fscanf(file, "%" SCNu32, &param.UNSET_ID.id);
+            break;
 
-    case HIDE_TEXT:
-        break;
+        case SET_ID:
+            fscanf(file, "%" SCNu32, &param.SET_ID.id);
+            break;
 
-    case WAIT_TIME:
-        param.WAIT_TIME.time.tv_nsec = 0;
-        fscanf(file, "%d", &auxnum);
-        param.WAIT_TIME.time.tv_sec = auxnum;
-        break;
-    case WAIT_ACCEPT:
-        break;
-    case REFRESH_GRAPHICS:
-        break;
-    case CHANGE_LEVEL:
-        break;
-    case CHANGE_SUBLEVEL:
-        break;
+        case START_EVENT:
+            param.START_EVENT.id.id = 0;
+            fscanf(file, "%" SCNu16 " %" SCNu16 " %" SCNu16,
+                &param.START_EVENT.id.position.column, &param.START_EVENT.id.position.row,
+                &param.START_EVENT.id.position.priority);
+            break;
 
-    default:
-        break;
+        case SHOW_TEXT:
+            fscanf(file, "%s", param.SHOW_TEXT.text);
+            break;
+
+        case HIDE_TEXT:
+            //no params
+            break;
+
+        case WAIT_TIME:
+            param.WAIT_TIME.time.tv_nsec = 0;
+            fscanf(file, "%d", &auxnum);
+            param.WAIT_TIME.time.tv_sec = auxnum;
+            break;
+
+        case WAIT_ACCEPT:
+            //no params
+            break;
+
+        case REFRESH_GRAPHICS:
+            //no params
+            break;
+
+        case CHANGE_LEVEL:
+            fscanf(file, "%" SCNu16, &param.CHANGE_LEVEL.level);
+            fscanf(file, "%" SCNu16, &param.CHANGE_LEVEL.sublevel);
+            fscanf(file, "%" SCNu16, &param.CHANGE_LEVEL.visible_upper_left_x);
+            fscanf(file, "%" SCNu16, &param.CHANGE_LEVEL.visible_upper_left_y);
+            break;
+
+        case CHANGE_SUBLEVEL:
+            fscanf(file, "%" SCNu16, &param.CHANGE_SUBLEVEL.sublevel);
+            fscanf(file, "%" SCNu16, &param.CHANGE_SUBLEVEL.visible_upper_left_x);
+            fscanf(file, "%" SCNu16, &param.CHANGE_SUBLEVEL.visible_upper_left_y);
+            break;
+
+        default:
+            break;
     }
 
     *event = CreateEvent(type, param);
@@ -399,6 +491,7 @@ int ReadEventListFile(FILE *file, Event_list **eventlist){
     }
 
     fclose(tmp);
+        //hay que encontrar una forma de eliminar el fichero temporal
 
     return 0;
 }

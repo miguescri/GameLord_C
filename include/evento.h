@@ -54,7 +54,6 @@ union id_event{
         uint16_t priority;
         uint16_t column;
         uint16_t row;
-        uint16_t stuffing;
     }position;
     uint64_t id;
 };
@@ -115,6 +114,20 @@ union event_params{
         uint32_t id;
         enum sprite_orientation direction;
     }CHANGE_DIRECTION_ID;
+
+    struct{
+        uint16_t level;
+        uint16_t sublevel;
+        uint16_t visible_upper_left_x;
+        uint16_t visible_upper_left_y;
+    }CHANGE_LEVEL;
+
+    struct{
+        uint16_t sublevel;
+        uint16_t visible_upper_left_x;
+        uint16_t visible_upper_left_y;
+    }CHANGE_SUBLEVEL;
+
 };
 
 struct level_info{
@@ -153,7 +166,7 @@ void ChainEvent(Evento *main, Evento *chain);
 
 void DestroyEvent(Evento **event);
 
-void StartEvent(Evento *event, Tablero *board, Event_list *eventlist, struct level_info *info);
+void StartEvent(Evento *event, Tablero *board, Event_list **eventlist, struct level_info *info);
 
 int WriteEventFile(FILE *file, Evento event);
 
@@ -178,7 +191,7 @@ int ActivateIdEventList(Event_list *eventlist, union id_event identificator);
 
 int DeactivateIdEventList(Event_list *eventlist, union id_event identificator);
 
-int StartIdEventList(Event_list *eventlist, union id_event identificator, Tablero *board, struct level_info *info);
+int StartIdEventList(Event_list **eventlist, union id_event identificator, Tablero *board, struct level_info *info);
 
 int WriteEventListFile(FILE *file, Event_list eventlist);
 

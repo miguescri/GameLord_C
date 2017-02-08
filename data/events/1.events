@@ -12,12 +12,18 @@
 16 9 10 14
 >
 #event 2
+#type SHOW_TEXT
+9
+#text of 63 chars without spaces
+Ups,_I've_been_transported
+>
+#event 3
 #type = WAIT_TIME
 11
 #seconds 
 2
 >
-#event 3
+#event 4
 #type = MOVE_FROM_TO
 0
 # x0, y0, x1, y1

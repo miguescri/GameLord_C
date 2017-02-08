@@ -56,6 +56,13 @@ int main(){
 
 ////////////////////////////////////////////////////////////////////////////
 void initializeAll(){
+    game_info.level = 1;
+    game_info.sub_level = 2;
+    game_info.visible_horizontal_squares = 16;
+    game_info.visible_vertical_squares = 12;
+    game_info.visible_upper_left_x = 16;
+    game_info.visible_upper_left_y = 0;
+
     CreateTablero(&game_board, 24, 32);
 
     FILE *file_map, *file_piece, *file_event;
@@ -71,6 +78,13 @@ void initializeAll(){
 
     ReadTableroFile(file_map, file_piece, &game_board);
     ReadEventListFile(file_event, &game_events);
+
+    InitGFX();
+    SetGrill(SCREEN_MAIN, game_info.visible_vertical_squares,
+        game_info.visible_horizontal_squares);
+    print_background(SCREEN_SECONDARY, game_info.level, 1);
+    print_background(SCREEN_MAIN, game_info.sub_level, 1);
+    UpdateSpriteInfo(game_board, game_info);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -146,6 +160,7 @@ void actionHandler(){
             case event:
             case jump:
                 MovePieceIdTablero(&game_board, main_character, x_destiny, y_destiny);
+                //event and jump fall through the switch
 
             //speaker is a event in which you can not occupy the position
             case speaker:
@@ -154,7 +169,7 @@ void actionHandler(){
                 event_position.position.column = x_destiny;
                 event_position.position.row = y_destiny;
                 event_position.position.priority = 1;
-                StartIdEventList(game_events, event_position, &game_board, &game_info);
+                StartIdEventList(&game_events, event_position, &game_board, &game_info);
                 break;
 
         }
@@ -164,6 +179,10 @@ void actionHandler(){
 void endAll(){
     DestroyTablero(&game_board);
     DestroyEventList(&game_events);
+    Remove_All_Sprites();
+    Remove_All_Backgrounds(SCREEN_MAIN);
+    Remove_All_Backgrounds(SCREEN_SECONDARY);
+    ShutGFX();
 }
 
 

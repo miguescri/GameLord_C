@@ -57,6 +57,10 @@ Post: IF there already is a piece with the identifier of [piece] THEN AddPieceTa
 */
 int AddPieceTablero(Tablero *board, Pieza piece);
 
+int InitPieceIterator(Tablero *board);
+
+int IteratePiece(Tablero *board, Pieza *piece);
+
 int ChangeTypeSquareTablero(Tablero *board, uint16_t x, uint16_t y, uint8_t type);
 
 int ChangeNameSquareTablero(Tablero *board, uint16_t x, uint16_t y, char name[]);
