@@ -1,6 +1,7 @@
 #ifndef GFX_INTERFACE_H_INCLUDED
 #define GFX_INTERFACE_H_INCLUDED
 
+#include <stdint.h>
 
 #ifndef BOOLEAN
 #define BOOLEAN
@@ -33,6 +34,8 @@ int print_background(enum screen where, int background_id, uint8_t depth);
 int Remove_All_Backgrounds(enum screen where);
 
 int print_text(enum screen where, char text[], int size_buff);
+
+int clear_text(enum screen where);
 
 int Create_Sprite(uint32_t sprite_id, int sprite_type, enum sprite_orientation orientation, uint16_t x, uint16_t y, bool visible);
 

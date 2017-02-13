@@ -163,11 +163,11 @@ void StartEvent(Evento *event, Tablero *board, Event_list **eventlist, struct le
                 break;
 
             case SHOW_TEXT:
-                print_text(SCREEN_MAIN, aux->params.SHOW_TEXT.text, 64);
+                print_text(SCREEN_SECONDARY, aux->params.SHOW_TEXT.text, 64);
                 break;
 
             case HIDE_TEXT:
-                print_text(SCREEN_MAIN, "", 1);
+                clear_text(SCREEN_SECONDARY);
                 break;
 
             case WAIT_TIME:

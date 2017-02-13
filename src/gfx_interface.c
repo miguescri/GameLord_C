@@ -40,6 +40,10 @@ int print_text(enum screen where, char text[], int size_buff){
     return 0;
 }
 
+int clear_text(enum screen where){
+    return 0;
+}
+
 int Create_Sprite(uint32_t sprite_id, int sprite_type, enum sprite_orientation orientation, uint16_t x, uint16_t y, bool visible){
     return 0;
 }

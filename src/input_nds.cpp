@@ -4,7 +4,8 @@
 
 int WaitInteraction(enum buttons type){
     if (type == ANY_BUTTON) {
-        ReadLastInteraction();
+        while (ReadLastInteraction() == ANY_BUTTON) {}
+            //this function returning ANY_BUTTON implies no interaction
     } else {
         while (ReadLastInteraction() != type) {}
     }
@@ -13,16 +14,21 @@ int WaitInteraction(enum buttons type){
 }
 
 enum buttons ReadLastInteraction(){
-    char c = getchar();
-    while(getchar() != '\n'){}
-
-    switch (c) {
-        case 'w':return UP_BUTTON;
-        case 'a':return LEFT_BUTTON;
-        case 's':return DOWN_BUTTON;
-        case 'd':return RIGHT_BUTTON;
-        case 'i':return A_BUTTON;
-        case 'o':return B_BUTTON;
-        default:return ANY_BUTTON;
+    int key = keysDown();
+    
+    if (key & KEY_UP)
+        return UP_BUTTON;
+    else if (key & KEY_LEFT)
+        return LEFT_BUTTON;
+    else if (key & KEY_DOWN)
+        return DOWN_BUTTON;
+    else if (key & KEY_RIGHT)
+        return RIGHT_BUTTON;
+    else if (key & KEY_A)
+        return A_BUTTON;
+    else if (key & KEY_B)
+        return B_BUTTON;
+    else 
+        return ANY_BUTTON;
     }
 }

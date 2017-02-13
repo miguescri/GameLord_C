@@ -122,7 +122,8 @@ void inputHandler(){
             break;
 
         default:
-            continue_game = FALSE;
+            //continue_game = FALSE;
+            break;
     }
 }
 
