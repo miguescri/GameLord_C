@@ -1,3 +1,8 @@
+/*
+  File: game_main.c
+  Author: Miguel Escribano (miguescri)
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "tablero.h"
@@ -85,6 +90,10 @@ void initializeAll(){
     print_background(SCREEN_SECONDARY, game_info.level, 1);
     print_background(SCREEN_MAIN, game_info.sub_level, 1);
     UpdateSpriteInfo(game_board, game_info);
+
+    fclose(file_map);
+    fclose(file_event);
+    fclose(file_piece);
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -185,16 +194,3 @@ void endAll(){
     Remove_All_Backgrounds(SCREEN_SECONDARY);
     ShutGFX();
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

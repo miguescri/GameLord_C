@@ -31,7 +31,7 @@ CPPLINK :=
 game    := GameLord
 
 # fuente del main
-main    := main
+main    := game_main
 # fuente de pieza
 piece   := pieza
 # fuente de casilla
@@ -49,11 +49,11 @@ parser  := comment_eraser
 
 # identificador de conjuntos de inclusión
 square_o    := ${bin}${piece}.o ${bin}${square}.o
-square_h    := ${head}${piece}.h ${head}${square}.h 
+square_h    := ${head}${piece}.h ${head}${square}.h
 board_o     := ${bin}${board}.o ${square_o}
 board_h     := ${head}${board}.h ${square_h} ${head}${parser}.h
 graphics_h  := ${head}${graphics}.h ${board_h}
-event_h     := ${head}${event}.h ${board_h} ${graphics_h} 
+event_h     := ${head}${event}.h ${board_h} ${graphics_h}
 
 ###############################################################################
 # definicion de objetivos
@@ -69,35 +69,35 @@ ${game}: ${bin}${main}.o ${board_o} ${bin}${event}.o ${bin}${input}.o ${bin}${gr
 
 # objetivo main.o
 ${bin}${main}.o: ${src}${main}.c ${board_h} ${event_h} ${head}${input}.h ${graphics_h}
-	${CC} -o ${bin}${main}.o -c ${CCFLAGS} ${src}${main}.c 
+	${CC} -o ${bin}${main}.o -c ${CCFLAGS} ${src}${main}.c
 
 # objetivo piece.o
 ${bin}${piece}.o: ${src}${piece}.c ${head}${piece}.h
-	${CC} -o ${bin}${piece}.o -c ${CCFLAGS} ${src}${piece}.c 
+	${CC} -o ${bin}${piece}.o -c ${CCFLAGS} ${src}${piece}.c
 
 # objetivo square.o
 ${bin}${square}.o: ${src}${square}.c ${square_h}
-	${CC} -o ${bin}${square}.o -c ${CCFLAGS} ${src}${square}.c 
+	${CC} -o ${bin}${square}.o -c ${CCFLAGS} ${src}${square}.c
 
 # objetivo board.o
 ${bin}${board}.o: ${src}${board}.c ${board_h}
-	${CC} -o ${bin}${board}.o -c ${CCFLAGS} ${src}${board}.c 
-	
+	${CC} -o ${bin}${board}.o -c ${CCFLAGS} ${src}${board}.c
+
 # objetivo event.o
 ${bin}${event}.o: ${src}${event}.c ${event_h}
-	${CC} -o ${bin}${event}.o -c ${CCFLAGS} ${src}${event}.c 
-	
+	${CC} -o ${bin}${event}.o -c ${CCFLAGS} ${src}${event}.c
+
 # objetivo input.o
 ${bin}${input}.o: ${src}${input}.c ${head}${input}.h
-	${CC} -o ${bin}${input}.o -c ${CCFLAGS} ${src}${input}.c 
-	
+	${CC} -o ${bin}${input}.o -c ${CCFLAGS} ${src}${input}.c
+
 # objetivo graphics.o
 ${bin}${graphics}.o: ${src}${graphics}.c ${graphics_h}
-	${CC} -o ${bin}${graphics}.o -c ${CCFLAGS} ${src}${graphics}.c 
-	
+	${CC} -o ${bin}${graphics}.o -c ${CCFLAGS} ${src}${graphics}.c
+
 # objetivo parser.o
-${bin}${parser}.o: ${src}${parser}.c ${head}${parser}.h 
-	${CC} -o ${bin}${parser}.o -c ${CCFLAGS} ${src}${parser}.c 
+${bin}${parser}.o: ${src}${parser}.c ${head}${parser}.h
+	${CC} -o ${bin}${parser}.o -c ${CCFLAGS} ${src}${parser}.c
 
 # objetivo para generar parser.c con flex
 ${src}${parser}.c:  ${src}${parser}.l
@@ -110,7 +110,7 @@ clean:
 	$(RM) ${game}
 	$(RM) ${file}.zip
 	$(RM) ${docu}
-	
+
 .PHONY:zip
 # objetivo para comprimir los fuentes y el Makefile
 zip:
@@ -120,30 +120,6 @@ zip:
 .PHONY:documents
 # objetivo para generar documentación
 documentacion: ${docu}
-	mkdir ${docu} 
+	mkdir ${docu}
 	doxygen -g
 	doxygen
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
