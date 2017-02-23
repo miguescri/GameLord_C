@@ -19,7 +19,8 @@ The chains of events can be activated or not and are binded to a board square wi
 
 There are certains events dedicated to handling other chains, such as activating them or triggering other chain (you can use both ID and highest activable priority for this). This last option works as follows:
 
-```IF choosen event chain exists AND choosen chain is activated THEN
+```
+IF choosen event chain exists AND choosen chain is activated THEN
 ···current chain stops being executed and the choosen chain starts
 ELSE
 ···current chain continues
