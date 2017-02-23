@@ -1,4 +1,5 @@
 **Project**: GameLord
+
 **Author**: Miguel Escribano (miguescri
 
 Gamelord is a homemade videogame engine which aims to provide an easy way of developping simple move-up-down-right-left games. It provides APIs for graphic and input handling, so it can be ported to different environments, such as NDS, with the less possible tuneup.
@@ -19,9 +20,12 @@ The chains of events can be activated or not and are binded to a board square wi
 There are certains events dedicated to handling other chains, such as activating them or triggering other chain (you can use both ID and highest activable priority for this). This last option works as follows:
 
 >IF choosen event chain exists AND choosen chain is activated THEN
->...current chain stops being executed and the choosen chain starts
+>
+>... current chain stops being executed and the choosen chain starts
+>
 >ELSE
->...current chain continues
+>
+>... current chain continues
 
 This behaviour lets you create logical structures inside the game. For example, if a door is to be opened with a key, there will be a deactivated event chain at the door, which moves the character to other world, and an activated chain at the key, so that it activates the first chain when stepping over. This way one will only be able to cross the door after taking the key.
 
@@ -52,6 +56,8 @@ This started as a way of creating a personal handcrafted present for a loved one
 If you need some cooler features, you should either look for a profesional IDE or help me develop this. I encourage you to the second (wink).
 
 Thank you for reading this.
+
+
 Miguel
 
 
