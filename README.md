@@ -21,9 +21,9 @@ There are certains events dedicated to handling other chains, such as activating
 
 ```
 IF choosen event chain exists AND choosen chain is activated THEN
-···current chain stops being executed and the choosen chain starts
+   current chain stops being executed and the choosen chain starts
 ELSE
-···current chain continues
+   current chain continues
 ```
 
 This behaviour lets you create logical structures inside the game. For example, if a door is to be opened with a key, there will be a deactivated event chain at the door, which moves the character to other world, and an activated chain at the key, so that it activates the first chain when stepping over. This way one will only be able to cross the door after taking the key.
